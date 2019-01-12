@@ -1,0 +1,29 @@
+#+TITLE: README
+
+[[https://github.com/swaywm/sway][sway]] doesn't support i3's layout restoring feature, so we approximate the
+desired functionality by launching applications and repositioning their windows.
+
+* Config File
+Defines the applications to launch, and where to position them.
+
+#+BEGIN_SRC yaml
+- cmdline:
+    - terminal
+  workspace: 4
+  output: HDMI-A-2
+- cmdline:
+    - terminal
+    - "--class=ranger"
+    - "-e"
+    - ranger
+  workspace: 5
+  output: HDMI-A-2
+#+END_SRC
+
+** cmdline
+The command line to run. This is an array of arguments, so you don't need to
+worry about escaping rules (although YAML does make it kind of awkward)
+** workspace
+The name of the workspace to move the application to
+** output
+The identifier of the output to move the workspace to
