@@ -4,24 +4,15 @@ import i3ipc
 import argparse
 import threading
 from subprocess import Popen, DEVNULL
+import yaml
+import sys
 
-# TODO: parse this from a config file
-processes = [
-    {
-        'cmdline': ['terminal'],
-        'workspace': 4,
-        'output': 'HDMI-A-2'
-    },
-    {
-        'cmdline': ['terminal', '--class=ranger', '-e', 'ranger'],
-        'workspace': 5,
-        'output': 'HDMI-A-2'
-    }
-]
+processes = []
 
 parser = argparse.ArgumentParser(description='Start some applications with a configured layout')
 parser.add_argument('-t', '--timeout', help='How long to wait for applications to start', type=int, default=5)
 parser.add_argument('-v', '--verbose', help='Log actions as they are performed', action='store_true')
+parser.add_argument('file', help='YAML file defining applications to start (or pipe to STDIN)', nargs=(1 if sys.stdin.isatty() else '?'))
 args = parser.parse_args()
 
 def find_process(cmdline):
@@ -54,6 +45,14 @@ def run():
     i3 = i3ipc.Connection()
     i3.on('window::new', on_window_new)
     i3.main(args.timeout)
+
+if args.file:
+    with open(args.file[0]) as f:
+        processes = yaml.load(f)
+else:
+    processes = yaml.load(sys.stdin)
+if args.verbose:
+    print(f'Loaded config: {processes}')
 
 t = threading.Thread(target=run)
 t.start()

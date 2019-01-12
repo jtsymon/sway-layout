@@ -1,0 +1,11 @@
+- cmdline:
+  - terminal
+  workspace: 4
+  output: HDMI-A-2
+- cmdline:
+  - terminal
+  - "--class=ranger"
+  - "-e"
+  - ranger
+  workspace: 5
+  output: HDMI-A-2
