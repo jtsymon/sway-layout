@@ -62,6 +62,7 @@ t = threading.Thread(target=run)
 t.start()
 
 for proc in processes:
+    proc['cmdline'] = list(str(x) for x in proc['cmdline'])
     if args.verbose:
         printable = ' '.join(proc['cmdline'])
         print(f'Starting {printable}')
