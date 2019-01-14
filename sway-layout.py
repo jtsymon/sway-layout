@@ -45,8 +45,9 @@ def on_window_new(i3, e):
     if not processes:
         i3.main_quit()
 
+i3 = i3ipc.Connection()
+
 def run():
-    i3 = i3ipc.Connection()
     i3.on('window::new', on_window_new)
     i3.main(args.timeout)
 
@@ -72,6 +73,9 @@ for proc in processes:
         env.update(proc['env'])
     if not 'match' in proc:
         proc['match'] = proc['cmdline']
+    if 'workspace' in proc:
+        workspace = proc['workspace']
+        i3.command(f'workspace {workspace}')
     Popen(['nohup'] + proc['cmdline'], env=env, stdout=DEVNULL, stderr=DEVNULL)
 
 t.join()
