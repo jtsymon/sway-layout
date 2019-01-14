@@ -3,26 +3,46 @@
 [[https://github.com/swaywm/sway][sway]] doesn't support i3's layout restoring feature, so we approximate the
 desired functionality by launching applications and repositioning their windows.
 
+* Usage
+Pass a layout config as a parameter or on STDIN.
+#+BEGIN_SRC sh
+sway-layout layout.yaml
+# or
+sway-layout < layout.yaml
+#+END_SRC
+
 * Config File
 Defines the applications to launch, and where to position them.
 
 #+BEGIN_SRC yaml
 - cmdline:
-    - terminal
-  workspace: 4
+    - firefox
+  match:
+    - "/usr/lib/firefox/firefox"
+  workspace: 1
   output: HDMI-A-2
 - cmdline:
     - terminal
-    - "--class=ranger"
-    - "-e"
-    - ranger
-  workspace: 5
-  output: HDMI-A-2
+    - "--class=torrents"
+    - "--working-directory=/mnt/storage"
+  env:
+    RUN: "ranger --selectfile=torrents"
+  workspace: 10
+  output: DVI-D-1
 #+END_SRC
 
 ** cmdline
 The command line to run. This is an array of arguments, so you don't need to
 worry about escaping rules (although YAML does make it kind of awkward)
+** match
+The process commandline to match against. Same behaviour as cmdline, and
+defaults to cmdline. Useful when the process who owns the window is different
+from the process specified by cmdline (e.g. emacsclient tells the emacs daemon
+to start a window, it doesn't actually own it, and firefox on your PATH is
+actually a shell script that starts the real browser)
+** env
+Environment variables to merge into the current environment when launching the
+application
 ** workspace
 The name of the workspace to move the application to
 ** output

@@ -6,6 +6,7 @@ import threading
 from subprocess import Popen, DEVNULL
 import yaml
 import sys
+import os
 
 processes = []
 
@@ -16,9 +17,12 @@ parser.add_argument('file', help='YAML file defining applications to start (or p
 args = parser.parse_args()
 
 def find_process(cmdline):
-    args = cmdline.split('\0')
+    clargs = cmdline.split('\0')
+    if args.verbose:
+        printable = ' '.join(clargs)
+        print(f"Matching {printable}")
     for proc in processes:
-        if args == proc['cmdline']:
+        if clargs == proc['match']:
             return proc
 
 def on_window_new(i3, e):
@@ -61,6 +65,12 @@ for proc in processes:
     if args.verbose:
         printable = ' '.join(proc['cmdline'])
         print(f'Starting {printable}')
-    Popen(['nohup'] + proc['cmdline'], stdout=DEVNULL, stderr=DEVNULL)
+    env = None
+    if 'env' in proc:
+        env = dict(os.environ)
+        env.update(proc['env'])
+    if not 'match' in proc:
+        proc['match'] = proc['cmdline']
+    Popen(['nohup'] + proc['cmdline'], env=env, stdout=DEVNULL, stderr=DEVNULL)
 
 t.join()
