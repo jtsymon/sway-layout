@@ -13,6 +13,7 @@ processes = []
 parser = argparse.ArgumentParser(description='Start some applications with a configured layout')
 parser.add_argument('-t', '--timeout', help='How long to wait for applications to start', type=int, default=5)
 parser.add_argument('-v', '--verbose', help='Log actions as they are performed', action='store_true')
+parser.add_argument('-s', '--synch', help='Make sure to start applications on their correct workspace, by waiting for each application to start. Helps if they have problems with being resized', action='store_true')
 parser.add_argument('file', help='YAML file defining applications to start (or pipe to STDIN)', nargs=(1 if sys.stdin.isatty() else '?'))
 args = parser.parse_args()
 
@@ -46,23 +47,9 @@ def on_window_new(i3, e):
         i3.main_quit()
 
 i3 = i3ipc.Connection()
+i3.on('window::new', on_window_new)
 
-def run():
-    i3.on('window::new', on_window_new)
-    i3.main(args.timeout)
-
-if args.file:
-    with open(args.file[0]) as f:
-        processes = yaml.load(f)
-else:
-    processes = yaml.load(sys.stdin)
-if args.verbose:
-    print(f'Loaded config: {processes}')
-
-t = threading.Thread(target=run)
-t.start()
-
-for proc in processes:
+def launch(proc):
     proc['cmdline'] = list(str(x) for x in proc['cmdline'])
     if args.verbose:
         printable = ' '.join(proc['cmdline'])
@@ -78,4 +65,28 @@ for proc in processes:
         i3.command(f'workspace {workspace}')
     Popen(['nohup'] + proc['cmdline'], env=env, stdout=DEVNULL, stderr=DEVNULL)
 
-t.join()
+def run():
+    i3.main(args.timeout)
+
+if args.file:
+    with open(args.file[0]) as f:
+        config = yaml.load(f)
+else:
+    config = yaml.load(sys.stdin)
+if args.verbose:
+    print(f'Loaded config: {config}')
+
+if args.synch:
+    for proc in config:
+        processes = [proc]
+        t = threading.Thread(target=run)
+        t.start()
+        launch(proc)
+        t.join()
+else:
+    processes = config
+    t = threading.Thread(target=run)
+    t.start()
+    for proc in config:
+        launch(proc)
+    t.join()
