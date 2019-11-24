@@ -96,9 +96,9 @@ def parse_config(config):
 
 if args.file:
     with open(args.file[0]) as f:
-        config = yaml.load(f)
+        config = yaml.load(f, Loader=yaml.SafeLoader)
 else:
-    config = yaml.load(sys.stdin)
+    config = yaml.load(sys.stdin, Loader=yaml.SafeLoader)
 if args.verbose:
     print(f'Loaded config: {config}')
 
