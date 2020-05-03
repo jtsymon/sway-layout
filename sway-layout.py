@@ -95,7 +95,7 @@ def parse_config(config):
     return programs
 
 if args.file:
-    with open(args.file[0]) as f:
+    with open(args.file) as f:
         config = yaml.load(f, Loader=yaml.SafeLoader)
 else:
     config = yaml.load(sys.stdin, Loader=yaml.SafeLoader)
