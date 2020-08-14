@@ -1,10 +1,10 @@
 pkgname=sway-layout
-pkgver=r9.8524668
+pkgver=r12.7b116c0
 pkgrel=1
 pkgdesc='Start and automatically layout applications in sway'
 license=('GPL2')
 arch=(any)
-depends=('i3ipc-python')
+depends=('python-i3ipc')
 makedepends=('git')
 url='https://github.com/jtsymon/sway-layout'
 source=("git+$url.git")
